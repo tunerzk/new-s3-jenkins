@@ -6,8 +6,8 @@ pipeline {
         TF_IN_AUTOMATION   = 'true'
     }
     stages{
-        stage {'set aws credentials'}
-        steps {
+    stage ('set aws credentials'){
+       steps {
             withCredentials([[
                 $class: 'AmazonWebServicesCredentialsBinding',
                 credentialsId: 'jenkinstest'   // Replace with your actual credentials ID
