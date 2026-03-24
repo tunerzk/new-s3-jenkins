@@ -108,6 +108,6 @@ pipeline {
                     echo 'terraform deployment failed'
                 }
             }
-        }
-    }
+        
+    
 }
