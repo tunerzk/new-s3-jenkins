@@ -3,25 +3,26 @@ pipeline {
 
     environment {
         AWS_DEFAULT_REGION = 'us-east-1'
-        TF_IN_AUTOMATION   = 'true'
-    }
-    stages{
-    stage ('set aws credentials'){
-       steps {
-            withCredentials([[
-                $class: 'AmazonWebServicesCredentialsBinding',
-                credentialsId: 'jenkinstest'   // Replace with your actual credentials ID
-            ]]) {
-            sh'''
-                echo "AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID"
-                aws sts get-caller-identity
-            '''
-            }
-        }
+        
     }
 
     stages {
-        stage('Checkout code') {
+
+        stage('Set AWS Credentials') {
+            steps {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'jenkinstest'
+                ]]) {
+                    sh '''
+                        echo "AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID"
+                        aws sts get-caller-identity
+                    '''
+                }
+            }
+        }
+
+        stage('Checkout Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/tunerzk/new-jenkins-s3-test.git'
             }
@@ -34,9 +35,9 @@ pipeline {
                     credentialsId: 'jenkinstest'
                 ]]) {
                     sh '''
-                    export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-                    export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-                    terraform init
+                        export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                        export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+                        terraform init
                     '''
                 }
             }
@@ -49,9 +50,9 @@ pipeline {
                     credentialsId: 'jenkinstest'
                 ]]) {
                     sh '''
-                    export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-                    export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-                    terraform plan -out=tfplan
+                        export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                        export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+                        terraform plan -out=tfplan
                     '''
                 }
             }
@@ -64,9 +65,8 @@ pipeline {
                     credentialsId: 'jenkinstest'
                 ]]) {
                     sh '''
-                    export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-                    export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-                        
+                        export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                        export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
                         terraform apply -auto-approve tfplan
                     '''
                 }
@@ -93,21 +93,26 @@ pipeline {
                             $class: 'AmazonWebServicesCredentialsBinding',
                             credentialsId: 'jenkinstest'
                         ]]) {
-                            sh 'terraform destroy -auto-approve'
+                            sh '''
+                                export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                                export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+                                terraform destroy -auto-approve
+                            '''
                         }
                     } else {
                         echo "Skipping destroy"
                     }
                 }
             }
-            post {
-                success {
-                    echo 'terraform deployment completed successfully'
-                }
-                failure {
-                    echo 'terraform deployment failed'
-                }
-            }
-        
-    
+        }
+    }
+
+    post {
+        success {
+            echo 'Terraform deployment completed successfully'
+        }
+        failure {
+            echo 'Terraform deployment failed'
+        }
+    }
 }
