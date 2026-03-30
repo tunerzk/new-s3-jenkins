@@ -26,7 +26,7 @@ resource "aws_iam_policy" "jenkins_policy" {
           "dynamodb:DeleteItem",
           "dynamodb:UpdateItem"
         ]
-        Resource = "arn:aws:dynamodb:us-east-1:<ACCOUNT_ID>:table/terraform-locks"
+        Resource = "arn:aws:dynamodb:us-east-1:590807097479:table/terraform-locks"
       }
     ]
   })
