@@ -72,8 +72,26 @@ pipeline {
                 }
             }
         }
+           stage('Upload Files to S3') {
+            steps {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'jenkinstest'
+                ]]) {
+                    sh '''
+                        export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                        export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+
+                        # Upload everything inside the uploads/ folder
+                        aws s3 cp uploads/ s3://theo-jenkins-s3-test20260330194114774900000001/ --recursive
+                    '''
+                }
+            }
+        }
 
     }  
+
+    
 
     post {
         success {
