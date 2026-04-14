@@ -8,3 +8,17 @@ terraform {
     use_lockfile   = true
   }
 }
+
+locals {
+  upload_files = fileset("uploads/", "**")
+}
+
+resource "aws_s3_object" "uploads" {
+  for_each = { for f in local.upload_files : f => f }
+
+  bucket = "terraform-state-kevjenkinstest"
+  key    = "uploads/${each.value}"
+  source = "uploads/${each.value}"
+  etag   = filemd5("uploads/${each.value}")
+}
+
