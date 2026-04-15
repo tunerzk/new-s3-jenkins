@@ -22,3 +22,9 @@ resource "aws_s3_object" "uploads" {
   etag   = filemd5("uploads/${each.value}")
 }
 
+resource "aws_s3_object" "upload_image" {
+  bucket = "terraform-state-kevjenkinstest"
+  key    = "uploads/8978169.jpg"
+  source = "uploads/8978169.jpg"
+  etag   = filemd5("uploads/8978169.jpg")
+}
